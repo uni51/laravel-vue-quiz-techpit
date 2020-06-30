@@ -92,6 +92,7 @@ export default {
     this.$http.get("/api/category").then(response => {
       this.category = response.data;
     });
+
     this.$http.get("/api/information").then(response => {
       this.information = response.data;
     });
