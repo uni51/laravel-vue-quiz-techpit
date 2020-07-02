@@ -2555,6 +2555,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
     TheSidebar: _layout_TheSidebar__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
+  mounted: function mounted() {
+    this.$http.get("/api/user").then(function (response) {
+      console.log(response.data);
+    });
   }
 });
 
@@ -75817,35 +75822,34 @@ module.exports = function(module) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
+/* WEBPACK VAR INJECTION */(function(global) {/* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _router_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./router.js */ "./resources/js/router.js");
 /* harmony import */ var vue_social_sharing__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! vue-social-sharing */ "./node_modules/vue-social-sharing/dist/vue-social-sharing.common.js");
 /* harmony import */ var vue_social_sharing__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(vue_social_sharing__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! axios */ "./node_modules/axios/index.js");
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_3__);
-/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
-/* harmony import */ var jquery__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(jquery__WEBPACK_IMPORTED_MODULE_4__);
-/* harmony import */ var _components_page_MainPage__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./components/page/MainPage */ "./resources/js/components/page/MainPage.vue");
+/* harmony import */ var _components_page_MainPage__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./components/page/MainPage */ "./resources/js/components/page/MainPage.vue");
 
 
 
 
 
-
-window.$ = window.jQuery = jquery__WEBPACK_IMPORTED_MODULE_4___default.a;
+global.jQuery = global.$ = __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js");
 
 __webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/npm.js");
 
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.prototype.$http = axios__WEBPACK_IMPORTED_MODULE_3___default.a;
+axios__WEBPACK_IMPORTED_MODULE_3___default.a.defaults.headers.common['Authorization'] = "Bearer " + document.querySelector('meta[name="api-token"]').getAttribute("content");
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vue_social_sharing__WEBPACK_IMPORTED_MODULE_2___default.a);
 new vue__WEBPACK_IMPORTED_MODULE_0___default.a({
   router: _router_js__WEBPACK_IMPORTED_MODULE_1__["default"],
   // routerにはrouter.jsファイルを設定します
   components: {
-    app: _components_page_MainPage__WEBPACK_IMPORTED_MODULE_5__["default"]
+    app: _components_page_MainPage__WEBPACK_IMPORTED_MODULE_4__["default"]
   }
 }).$mount('#app'); // routerを適用する要素を設定(マウント)します
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 

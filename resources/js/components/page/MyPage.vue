@@ -23,5 +23,10 @@
     components: {
       TheSidebar
     },
+    mounted() {
+      this.$http.get("/api/user").then(response => {
+        console.log(response.data);
+      });
+    }
   };
 </script>
