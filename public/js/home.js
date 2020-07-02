@@ -86,6 +86,43 @@
 /************************************************************************/
 /******/ ({
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/module/BarChart.vue?vue&type=script&lang=js&":
+/*!**************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/module/BarChart.vue?vue&type=script&lang=js& ***!
+  \**************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vue_chartjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-chartjs */ "./node_modules/vue-chartjs/es/index.js");
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  "extends": vue_chartjs__WEBPACK_IMPORTED_MODULE_0__["Bar"],
+  props: {
+    chartData: {
+      type: Object
+    }
+  },
+  methods: {
+    renderBarChart: function renderBarChart() {
+      this.renderChart(this.chartData, {
+        scales: {
+          yAxes: [{
+            ticks: {
+              beginAtZero: true,
+              min: 0,
+              max: 100
+            }
+          }]
+        }
+      });
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/page/Home.vue?vue&type=script&lang=js&":
 /*!********************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/page/Home.vue?vue&type=script&lang=js& ***!
@@ -96,7 +133,8 @@
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _layout_TheSidebar__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../layout/TheSidebar */ "./resources/js/components/layout/TheSidebar.vue");
-/* harmony import */ var _module_BarChart__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../module/BarChart */ "./resources/js/components/module/BarChart.js");
+/* harmony import */ var _module_BarChart__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../module/BarChart */ "./resources/js/components/module/BarChart.vue");
+//
 //
 //
 //
@@ -172,9 +210,13 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       categories: [1],
-      // categoriesのデフォルト値を設定します。ここでは[1]配列の1とします。
       information: [],
-      category: []
+      category: [],
+      rankingAlldata: {},
+      week: {},
+      month: {},
+      total: {},
+      rankingType: "1"
     };
   },
   mounted: function mounted() {
@@ -186,11 +228,57 @@ __webpack_require__.r(__webpack_exports__);
     this.$http.get("/api/information").then(function (response) {
       _this.information = response.data;
     });
+    this.$http.get("/api/ranking").then(function (response) {
+      _this.rankingAlldata = response.data;
+
+      _this.setRanking();
+    });
   },
   methods: {
     goQuiz: function goQuiz() {
-      // @click.stop.preventで設定したgoQuiz()をここで定義します
-      this.$router.push("/quiz?categories=" + this.categories); // this.$router.pushを使うことで、画面リロードすることなくURLを変更できます。
+      this.$router.push("/quiz?categories=" + this.categories);
+    },
+    setRanking: function setRanking() {
+      var _this2 = this;
+
+      // Object.assignを使用してthis.weekに値を代入
+      // オブジェクトの値にプロパティを追加し更新するときは、Vue.set(this.$set)、
+      // オブジェクトそのものに、値を代入して更新したいときはObject.assign()を使う必要がある
+      this.week = Object.assign({}, this.week, {
+        labels: this.rankingAlldata.weekRankingData.name,
+        datasets: [{
+          label: ["最高得点率"],
+          backgroundColor: "rgba(0, 170, 248, 0.47)",
+          data: this.rankingAlldata.weekRankingData.percentage_correct_answer
+        }]
+      }); // Object.assignを使用してthis.monthに値を代入
+
+      this.month = Object.assign({}, this.month, {
+        labels: this.rankingAlldata.monthRankingData.name,
+        datasets: [{
+          label: ["最高得点率"],
+          backgroundColor: "rgba(0, 170, 248, 0.47)",
+          data: this.rankingAlldata.monthRankingData.percentage_correct_answer
+        }]
+      }); // Object.assignを使用してthis.totalに値を代入
+
+      this.total = Object.assign({}, this.total, {
+        labels: this.rankingAlldata.totalRankingData.name,
+        datasets: [{
+          label: ["最高得点率"],
+          backgroundColor: "rgba(0, 170, 248, 0.47)",
+          data: this.rankingAlldata.totalRankingData.percentage_correct_answer
+        }]
+      }); // nextTickは、オブジェクトを更新しさらにDOMを更新したいときに使うグローバルなメソッドです
+      // Object.assign()についてはDOMは更新されないので、nextTick（手動）でDOMを更新する必要がある。
+
+      this.$nextTick(function () {
+        _this2.$refs.totalChart.renderBarChart();
+
+        _this2.$refs.monthChart.renderBarChart();
+
+        _this2.$refs.weekChart.renderBarChart();
+      });
     }
   }
 });
@@ -38633,7 +38721,6 @@ var render = function() {
               _vm._v(" "),
               _c(
                 "form",
-                { attrs: { action: "/quiz", method: "post" } },
                 [
                   _vm._l(_vm.category, function(cate, index) {
                     return _c("label", { key: index }, [
@@ -38646,7 +38733,7 @@ var render = function() {
                             expression: "categories"
                           }
                         ],
-                        attrs: { type: "checkbox" },
+                        attrs: { type: "checkbox", checked: "" },
                         domProps: {
                           value: cate.id,
                           checked: Array.isArray(_vm.categories)
@@ -38675,7 +38762,11 @@ var render = function() {
                           }
                         }
                       }),
-                      _vm._v(_vm._s(cate.name) + " \n            ")
+                      _vm._v(
+                        "\n              " +
+                          _vm._s(cate.name) +
+                          " \n            "
+                      )
                     ])
                   }),
                   _vm._v(" "),
@@ -38695,11 +38786,7 @@ var render = function() {
                       }
                     },
                     [_vm._v("出題開始")]
-                  ),
-                  _vm._v(" "),
-                  _c("input", {
-                    attrs: { type: "hidden", name: "_token", value: "" }
-                  })
+                  )
                 ],
                 2
               )
@@ -38708,12 +38795,117 @@ var render = function() {
             _c("section", { staticClass: "home-quiz__ranking" }, [
               _vm._m(3),
               _vm._v(" "),
-              _vm._m(4),
+              _c("div", [
+                _c("label", [
+                  _c("input", {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.rankingType,
+                        expression: "rankingType"
+                      }
+                    ],
+                    staticClass: "ranking-radio",
+                    attrs: { type: "radio", value: "1" },
+                    domProps: { checked: _vm._q(_vm.rankingType, "1") },
+                    on: {
+                      change: function($event) {
+                        _vm.rankingType = "1"
+                      }
+                    }
+                  }),
+                  _vm._v("総合\n            ")
+                ]),
+                _vm._v(" "),
+                _c("label", [
+                  _c("input", {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.rankingType,
+                        expression: "rankingType"
+                      }
+                    ],
+                    staticClass: "ranking-radio",
+                    attrs: { type: "radio", value: "2" },
+                    domProps: { checked: _vm._q(_vm.rankingType, "2") },
+                    on: {
+                      change: function($event) {
+                        _vm.rankingType = "2"
+                      }
+                    }
+                  }),
+                  _vm._v("今月\n            ")
+                ]),
+                _vm._v(" "),
+                _c("label", [
+                  _c("input", {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.rankingType,
+                        expression: "rankingType"
+                      }
+                    ],
+                    staticClass: "ranking-radio",
+                    attrs: { type: "radio", value: "3" },
+                    domProps: { checked: _vm._q(_vm.rankingType, "3") },
+                    on: {
+                      change: function($event) {
+                        _vm.rankingType = "3"
+                      }
+                    }
+                  }),
+                  _vm._v("今週\n            ")
+                ])
+              ]),
               _vm._v(" "),
               _c(
                 "div",
                 { staticClass: "home_quiz__ranking-chart" },
-                [_c("bar-chart")],
+                [
+                  _c("bar-chart", {
+                    directives: [
+                      {
+                        name: "show",
+                        rawName: "v-show",
+                        value: _vm.rankingType === "1",
+                        expression: "rankingType === '1'"
+                      }
+                    ],
+                    ref: "totalChart",
+                    attrs: { chartData: _vm.total }
+                  }),
+                  _vm._v(" "),
+                  _c("bar-chart", {
+                    directives: [
+                      {
+                        name: "show",
+                        rawName: "v-show",
+                        value: _vm.rankingType === "2",
+                        expression: "rankingType === '2'"
+                      }
+                    ],
+                    ref: "monthChart",
+                    attrs: { chartData: _vm.month }
+                  }),
+                  _vm._v(" "),
+                  _c("bar-chart", {
+                    directives: [
+                      {
+                        name: "show",
+                        rawName: "v-show",
+                        value: _vm.rankingType === "3",
+                        expression: "rankingType === '3'"
+                      }
+                    ],
+                    ref: "weekChart",
+                    attrs: { chartData: _vm.week }
+                  })
+                ],
                 1
               )
             ]),
@@ -38722,7 +38914,7 @@ var render = function() {
               "section",
               { staticClass: "home__notice" },
               [
-                _vm._m(5),
+                _vm._m(4),
                 _vm._v(" "),
                 _vm._l(_vm.information, function(info, index) {
                   return _c("dl", { key: index }, [
@@ -38784,31 +38976,17 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", {}, [
+    return _c("div", [
       _vm._v("\n              全項目チェック\n              "),
       _c(
         "button",
-        {
-          attrs: {
-            type: "button",
-            name: "check_all",
-            id: "check-all",
-            value: "1"
-          }
-        },
+        { attrs: { type: "button", name: "check_all", value: "1" } },
         [_vm._v("ON")]
       ),
       _vm._v(" "),
       _c(
         "button",
-        {
-          attrs: {
-            type: "button",
-            name: "check_all_off",
-            id: "check-all-off",
-            value: "1"
-          }
-        },
+        { attrs: { type: "button", name: "check_all_off", value: "1" } },
         [_vm._v("OFF")]
       )
     ])
@@ -38823,41 +39001,6 @@ var staticRenderFns = [
         attrs: { src: "/images/graph-icon.png" }
       }),
       _vm._v("ランキング\n          ")
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", [
-      _c("label", [
-        _c("input", {
-          staticClass: "ranking-radio",
-          attrs: {
-            type: "radio",
-            name: "ranking-radio",
-            value: "1",
-            checked: ""
-          }
-        }),
-        _vm._v("総合\n            ")
-      ]),
-      _vm._v(" "),
-      _c("label", [
-        _c("input", {
-          staticClass: "ranking-radio",
-          attrs: { type: "radio", name: "ranking-radio", value: "2" }
-        }),
-        _vm._v("今月\n            ")
-      ]),
-      _vm._v(" "),
-      _c("label", [
-        _c("input", {
-          staticClass: "ranking-radio",
-          attrs: { type: "radio", name: "ranking-radio", value: "3" }
-        }),
-        _vm._v("今週\n            ")
-      ])
     ])
   },
   function() {
@@ -51507,40 +51650,53 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./resources/js/components/module/BarChart.js":
-/*!****************************************************!*\
-  !*** ./resources/js/components/module/BarChart.js ***!
-  \****************************************************/
+/***/ "./resources/js/components/module/BarChart.vue":
+/*!*****************************************************!*\
+  !*** ./resources/js/components/module/BarChart.vue ***!
+  \*****************************************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var vue_chartjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vue-chartjs */ "./node_modules/vue-chartjs/es/index.js");
+/* harmony import */ var _BarChart_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./BarChart.vue?vue&type=script&lang=js& */ "./resources/js/components/module/BarChart.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+var render, staticRenderFns
 
-/* harmony default export */ __webpack_exports__["default"] = ({
-  "extends": vue_chartjs__WEBPACK_IMPORTED_MODULE_0__["Bar"],
-  mounted: function mounted() {
-    this.renderChart({
-      labels: ["タ・ナカ", "Suzuki", "Saito", "Moriyama", "アオキ", "村町"],
-      datasets: [{
-        label: "最高得点率",
-        backgroundColor: "rgba(0, 170, 248, 0.47)",
-        data: [100, 90, 80, 70, 60, 50]
-      }]
-    }, {
-      scales: {
-        yAxes: [{
-          ticks: {
-            beginAtZero: true,
-            min: 0,
-            max: 100
-          }
-        }]
-      }
-    });
-  }
-});
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_1__["default"])(
+  _BarChart_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"],
+  render,
+  staticRenderFns,
+  false,
+  null,
+  null,
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/module/BarChart.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/module/BarChart.vue?vue&type=script&lang=js&":
+/*!******************************************************************************!*\
+  !*** ./resources/js/components/module/BarChart.vue?vue&type=script&lang=js& ***!
+  \******************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_BarChart_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!../../../../node_modules/vue-loader/lib??vue-loader-options!./BarChart.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/module/BarChart.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_BarChart_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
 
 /***/ }),
 

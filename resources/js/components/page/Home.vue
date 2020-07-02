@@ -14,17 +14,17 @@
             <h2 class="home-quiz__setting-h2">
               <img class="home-quiz__setting-h2-logo" src="/images/directory-icon.png" />出題設定
             </h2>
-            <form action="/quiz" method="post">
+            <form>
               <label v-for="(cate, index) in category" :key="index">
-                <input type="checkbox" v-model="categories" :value="cate.id" />{{cate.name}} 
+                <input type="checkbox" v-model="categories" :value="cate.id" checked />
+                {{cate.name}} 
               </label>
-              <div class>
+              <div>
                 全項目チェック
-                <button type="button" name="check_all" id="check-all" value="1">ON</button>
-                <button type="button" name="check_all_off" id="check-all-off" value="1">OFF</button>
+                <button type="button" name="check_all" value="1">ON</button>
+                <button type="button" name="check_all_off" value="1">OFF</button>
               </div>
               <button type="submit" class="btn btn-primary" @click.stop.prevent="goQuiz()">出題開始</button>
-              <input type="hidden" name="_token" value />
             </form>
           </section>
           <section class="home-quiz__ranking">
@@ -33,17 +33,19 @@
             </h2>
             <div>
               <label>
-                <input class="ranking-radio" type="radio" name="ranking-radio" value="1" checked />総合
+                <input class="ranking-radio" type="radio" v-model="rankingType" value="1" />総合
               </label>
               <label>
-                <input class="ranking-radio" type="radio" name="ranking-radio" value="2" />今月
+                <input class="ranking-radio" type="radio" v-model="rankingType" value="2" />今月
               </label>
               <label>
-                <input class="ranking-radio" type="radio" name="ranking-radio" value="3" />今週
+                <input class="ranking-radio" type="radio" v-model="rankingType" value="3" />今週
               </label>
             </div>
             <div class="home_quiz__ranking-chart">
-              <bar-chart></bar-chart>
+              <bar-chart :chartData="total" ref="totalChart" v-show="rankingType === '1'"></bar-chart>
+              <bar-chart :chartData="month" ref="monthChart" v-show="rankingType === '2'"></bar-chart>
+              <bar-chart :chartData="week" ref="weekChart" v-show="rankingType === '3'"></bar-chart>
             </div>
           </section>
           <section class="home__notice">
@@ -59,39 +61,90 @@
         <the-sidebar></the-sidebar>
       </div>
     </main>
-
   </div>
 </template>
 
 <script>
-import TheSidebar from "../layout/TheSidebar";
-import BarChart from "../module/BarChart";
+  import TheSidebar from "../layout/TheSidebar";
+  import BarChart from "../module/BarChart";
 
-export default {
-  components: {
-    TheSidebar,
-    BarChart,
-  },
-  data() {
-    return {
-      categories: [1], // categoriesのデフォルト値を設定します。ここでは[1]配列の1とします。
-      information :[],
-      category: [],
-    };
-  },
-  mounted() {
-    this.$http.get("/api/category").then(response => {
-      this.category = response.data;
-    });
-
-    this.$http.get("/api/information").then(response => {
-      this.information = response.data;
-    });
-  },
-  methods: {
-    goQuiz() { // @click.stop.preventで設定したgoQuiz()をここで定義します
-      this.$router.push("/quiz?categories=" + this.categories); // this.$router.pushを使うことで、画面リロードすることなくURLを変更できます。
+  export default {
+    components: {
+      TheSidebar,
+      BarChart
+    },
+    data() {
+      return {
+        categories: [1],
+        information: [],
+        category: [],
+        rankingAlldata: {},
+        week: {},
+        month: {},
+        total: {},
+        rankingType: "1",
+      };
+    },
+    mounted() {
+      this.$http.get("/api/category").then(response => {
+        this.category = response.data;
+      });
+      this.$http.get("/api/information").then(response => {
+        this.information = response.data;
+      });
+      this.$http.get("/api/ranking").then(response => {
+        this.rankingAlldata = response.data;
+        this.setRanking();
+      });
+    },
+    methods: {
+      goQuiz() {
+        this.$router.push("/quiz?categories=" + this.categories);
+      },
+      setRanking() {
+        // Object.assignを使用してthis.weekに値を代入
+        // オブジェクトの値にプロパティを追加し更新するときは、Vue.set(this.$set)、
+        // オブジェクトそのものに、値を代入して更新したいときはObject.assign()を使う必要がある
+        this.week = Object.assign({}, this.week, {
+          labels: this.rankingAlldata.weekRankingData.name,
+          datasets: [
+            {
+              label: ["最高得点率"],
+              backgroundColor: "rgba(0, 170, 248, 0.47)",
+              data: this.rankingAlldata.weekRankingData.percentage_correct_answer
+            }
+          ]
+        });
+        // Object.assignを使用してthis.monthに値を代入
+        this.month = Object.assign({}, this.month, {
+          labels: this.rankingAlldata.monthRankingData.name,
+          datasets: [
+            {
+              label: ["最高得点率"],
+              backgroundColor: "rgba(0, 170, 248, 0.47)",
+              data: this.rankingAlldata.monthRankingData.percentage_correct_answer
+            }
+          ]
+        });
+        // Object.assignを使用してthis.totalに値を代入
+        this.total = Object.assign({}, this.total, {
+          labels: this.rankingAlldata.totalRankingData.name,
+          datasets: [
+            {
+              label: ["最高得点率"],
+              backgroundColor: "rgba(0, 170, 248, 0.47)",
+              data: this.rankingAlldata.totalRankingData.percentage_correct_answer
+            }
+          ]
+        });
+        // nextTickは、オブジェクトを更新しさらにDOMを更新したいときに使うグローバルなメソッドです
+        // Object.assign()についてはDOMは更新されないので、nextTick（手動）でDOMを更新する必要がある。
+        this.$nextTick(() => {
+          this.$refs.totalChart.renderBarChart();
+          this.$refs.monthChart.renderBarChart();
+          this.$refs.weekChart.renderBarChart();
+        });
+      },
     }
-  }
-};
+  };
 </script>
