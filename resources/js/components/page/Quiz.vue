@@ -84,6 +84,7 @@
   import TheModal from "../module/TheModal";
 
   export default {
+
     components: {
       TheSidebar,
       TheModal

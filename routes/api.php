@@ -23,3 +23,6 @@ Route::group(['middleware' => ['api']], function () {
     Route::get('quiz', 'Api\QuizController@index');
     Route::get('ranking', 'Api\RankingController@index');
 });
+
+// middleware('auth:api')で認証を通したAPIのみを許可設定している
+Route::middleware('auth:api')->get('/mypage', 'Api\MypageController@index');
