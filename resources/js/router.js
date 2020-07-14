@@ -4,7 +4,7 @@ import Home from './components/page/Home'
 import Quiz from './components/page/Quiz'
 import Register from './components/page/Register'
 import Login from './components/page/Login'
-import Mypage from './components/page/Mypage'
+import MyPage from './components/page/MyPage'
 import Keyword from './components/page/Keyword'
 
 Vue.use(Router)
@@ -35,7 +35,7 @@ const router = new Router({
     {
       path: '/mypage',
       name: 'mypage',
-      component: Mypage,
+      component: MyPage,
       meta: {
         requiresAuth: true
       }
